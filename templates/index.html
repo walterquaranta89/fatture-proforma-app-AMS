@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore Fatture Pro Forma | AGENCY MANAGEMENT SHIPPING srls</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dragover {
+            border-color: #2563eb !important;
+            background-color: #eff6ff !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <!-- Header Aziendale -->
+    <header class="bg-[#0f3868] text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2.5 rounded-lg border border-white/20">
+                    <i class="fa-solid fa-ship text-2xl text-blue-200"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">AGENCY MANAGEMENT SHIPPING srls</h1>
+                    <p class="text-xs text-blue-200 uppercase tracking-wider font-semibold">Generatore Automatico Fatture Pro Forma</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/download-sample" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-700/70 hover:bg-blue-600 transition border border-blue-400/30 text-white shadow-sm">
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                    Esempio Excel (5 Aziende)
+                </a>
+                <a href="/download-sample-csv" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-blue-800/80 hover:bg-blue-700 transition border border-blue-400/30 text-white shadow-sm">
+                    <i class="fa-solid fa-file-csv text-amber-300"></i>
+                    Esempio CSV
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+        <!-- Banner Introduttivo / Info -->
+        <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="space-y-1">
+                <h2 class="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i>
+                    Creazione Istantanea Fatture Pro Forma
+                </h2>
+                <p class="text-sm text-slate-600">
+                    Carica l'elenco dei trasporti in formato Excel o CSV. Il sistema raggrupperà automaticamente i viaggi per ciascun cliente ed emetterà il PDF della fattura pro forma con i DDT corrispondenti, i totali calcolati e il layout ufficiale di <b>Agency Management Shipping srls</b>.
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 text-xs text-slate-600 shrink-0">
+                <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600 font-bold"></i> 1 Fattura per Cliente</div>
+                <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600 font-bold"></i> N° DDT e Container</div>
+                <div class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-600 font-bold"></i> Calcolo Automatico IVA</div>
+            </div>
+        </div>
+
+        <!-- Form e Configurazione -->
+        <form id="uploadForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Data Fattura -->
+                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700">
+                        <i class="fa-regular fa-calendar-days text-blue-600 mr-1.5"></i>
+                        Data Emissione Pro Forma
+                    </label>
+                    <input type="date" name="invoice_date" id="invoiceDate" value="{{ today }}" 
+                           class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <p class="text-xs text-slate-500">Impostata di default su oggi. Viene stampata su ogni pro forma.</p>
+                </div>
+
+                <!-- Numero di Partenza -->
+                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700">
+                        <i class="fa-solid fa-hashtag text-blue-600 mr-1.5"></i>
+                        Numero Fattura Iniziale
+                    </label>
+                    <input type="number" name="start_number" id="startNumber" value="1" min="1" 
+                           class="w-full px-3.5 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <p class="text-xs text-slate-500">Incrementa progressivamente per ogni cliente (es. 01, 02...).</p>
+                </div>
+
+                <!-- Cartella Output -->
+                <div class="bg-white border border-slate-200 p-5 rounded-xl shadow-sm space-y-2">
+                    <label class="block text-sm font-semibold text-slate-700">
+                        <i class="fa-solid fa-folder-open text-blue-600 mr-1.5"></i>
+                        Cartella Archiviazione PDF
+                    </label>
+                    <div class="text-xs text-slate-600 bg-slate-100 p-2.5 rounded-lg border border-slate-200 font-mono">
+                        fatture-proforma-app/fatture_generate/
+                    </div>
+                    <p class="text-xs text-slate-500">I file rimangono salvati sul disco e puoi scaricarli in ZIP.</p>
+                </div>
+            </div>
+
+            <!-- Area Upload Drag & Drop -->
+            <div id="dropZone" class="border-2 border-dashed border-slate-300 hover:border-blue-500 bg-white rounded-2xl p-10 text-center transition cursor-pointer shadow-sm group">
+                <input type="file" id="fileInput" name="file" accept=".xlsx, .xls, .csv" class="hidden">
+                <div class="space-y-4 max-w-md mx-auto">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto group-hover:scale-110 transition duration-300">
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-slate-800">
+                            Trascina qui il file Excel o CSV dei trasporti
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">oppure clicca qui per selezionarlo dal computer (.xlsx, .xls, .csv)</p>
+                    </div>
+                    <div id="fileInfo" class="hidden inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-lg text-sm font-medium">
+                        <i class="fa-solid fa-file-check"></i>
+                        <span id="fileName">nome_file.xlsx</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pulsante Azione -->
+            <div class="flex justify-end">
+                <button type="submit" id="submitBtn" class="inline-flex items-center gap-2 bg-[#0f3868] hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-gears"></i>
+                    <span>Elabora e Genera Fatture Pro Forma</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Spinner di caricamento -->
+        <div id="loadingState" class="hidden text-center py-12">
+            <div class="inline-block animate-spin text-[#0f3868] text-4xl mb-3">
+                <i class="fa-solid fa-circle-notch"></i>
+            </div>
+            <p class="text-base font-semibold text-slate-700">Elaborazione file e impaginazione PDF in corso...</p>
+            <p class="text-xs text-slate-500">Raggruppamento viaggi e calcolo totali in esecuzione.</p>
+        </div>
+
+        <!-- Box Errore -->
+        <div id="errorAlert" class="hidden bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl flex items-center gap-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-lg"></i>
+            <span id="errorMessage" class="text-sm font-medium">Si è verificato un errore.</span>
+        </div>
+
+        <!-- Risultati della Generazione -->
+        <div id="resultsCard" class="hidden bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden space-y-4 p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        Fatture Pro Forma Create con Successo
+                    </h3>
+                    <p class="text-xs text-slate-500">
+                        Generate <span id="clientsCount" class="font-bold text-slate-800">0</span> fatture pro forma distinte.
+                    </p>
+                </div>
+                <a id="downloadZipBtn" href="/download-all-zip" class="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl shadow transition">
+                    <i class="fa-solid fa-file-zipper"></i>
+                    Scarica Tutte in un Archivio ZIP
+                </a>
+            </div>
+
+            <!-- Tabella Riepilogativa -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-y border-slate-200">
+                            <th class="py-3 px-4 font-semibold">N° Fattura</th>
+                            <th class="py-3 px-4 font-semibold">Cliente / Committente</th>
+                            <th class="py-3 px-4 font-semibold">Indirizzo</th>
+                            <th class="py-3 px-4 font-semibold text-center">N° Viaggi</th>
+                            <th class="py-3 px-4 font-semibold text-right">Imponibile</th>
+                            <th class="py-3 px-4 font-semibold text-right">IVA</th>
+                            <th class="py-3 px-4 font-semibold text-right">Totale</th>
+                            <th class="py-3 px-4 font-semibold text-center">Azione</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesTableBody" class="divide-y divide-slate-100">
+                        <!-- Popolato dinamicamente da JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-12 text-center text-xs text-slate-400 py-6 border-t border-slate-200">
+        AGENCY MANAGEMENT SHIPPING srls • Trav. Via Toniolo SN, Palagiano (TA) • P.I. 03067000731
+    </footer>
+
+    <!-- Script Logica Frontend -->
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileNameSpan = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingState = document.getElementById('loadingState');
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsCard = document.getElementById('resultsCard');
+        const invoicesTableBody = document.getElementById('invoicesTableBody');
+        const clientsCount = document.getElementById('clientsCount');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Drag & drop handlers
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('dragover');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileSelect(fileInput.files[0]);
+            }
+        });
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files && fileInput.files.length > 0) {
+                handleFileSelect(fileInput.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            fileNameSpan.textContent = file.name;
+            fileInfo.classList.remove('hidden');
+            errorAlert.classList.add('hidden');
+        }
+
+        // Invio form
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError("Per favore seleziona o trascina prima un file Excel o CSV.");
+                return;
+            }
+
+            const formData = new FormData(uploadForm);
+
+            loadingState.classList.remove('hidden');
+            resultsCard.classList.add('hidden');
+            errorAlert.classList.add('hidden');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || data.error) {
+                    showError(data.error || "Errore sconosciuto durante la generazione.");
+                    return;
+                }
+
+                clientsCount.textContent = data.count;
+                invoicesTableBody.innerHTML = '';
+
+                data.invoices.forEach(inv => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-bold text-[#0f3868]">N° ${inv.number}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">${inv.client}</td>
+                        <td class="py-3 px-4 text-xs text-slate-500">${inv.address || '-'}</td>
+                        <td class="py-3 px-4 text-center">
+                            <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                                ${inv.transports_count} viaggi
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-right font-mono text-xs">${inv.imponibile}</td>
+                        <td class="py-3 px-4 text-right font-mono text-xs">${inv.iva}</td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-900 font-mono text-sm">${inv.totale}</td>
+                        <td class="py-3 px-4 text-center">
+                            <a href="/download-pdf/${inv.pdf_file}" target="_blank" 
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-blue-700 border border-slate-200 rounded-lg text-xs font-semibold transition">
+                                <i class="fa-solid fa-file-pdf text-rose-500"></i> Scarica PDF
+                            </a>
+                        </td>
+                    `;
+                    invoicesTableBody.appendChild(tr);
+                });
+
+                resultsCard.classList.remove('hidden');
+
+            } catch (err) {
+                showError("Errore di connessione al server: " + err.message);
+            } finally {
+                loadingState.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorAlert.classList.remove('hidden');
+            loadingState.classList.add('hidden');
+            submitBtn.disabled = false;
+        }
+    </script>
+</body>
+</html>

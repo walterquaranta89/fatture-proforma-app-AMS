@@ -28,6 +28,7 @@ COLUMN_ALIASES = {
     'piva': ['piva', 'p.iva', 'partita iva', 'c. f./p. iva', 'c.f./p.iva', 'cf/piva', 'codice fiscale', 'cf', 'p_iva'],
     'codice_cof': ['codice cof', 'codice_cof', 'cof', 'codice', 'codice cliente'],
     'modalita_pagamento': ['modalita di pagamento', 'modalita pagamento', 'modalità di pagamento', 'modalità pagamento', 'pagamento', 'condizioni pagamento'],
+    'iban': ['iban', 'i.b.a.n.', 'coordinate bancarie', 'conto iban', 'codice iban', 'banca iban', 'iban banca'],
     'ddt_numero': [
         'ddt', 'd.d.t.', 'd d t', 'numero ddt', 'num ddt', 'ddt_numero', 'n ddt', 'n. ddt', 
         'n° ddt', 'ddt n.', 'ddt n°', 'doc trasporto', 'bolla', 'num. ddt', 'n.ddt', 'ddt_num', 

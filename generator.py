@@ -402,15 +402,22 @@ def create_proforma_pdf(client_data, transports, output_path_or_buffer, invoice_
     if pd.isna(payment_method) or payment_method.strip() == '' or payment_method.lower() == 'nan':
         payment_method = 'RIMESSA DIRETTA'
     
+    iban_val = client_data.get('iban', '')
+    iban = str(iban_val).strip() if pd.notna(iban_val) else ''
+    if iban.lower() == 'nan':
+        iban = ''
+    
+    iban_paragraph = Paragraph(f"<b>IBAN:</b> {iban}", cell_bold) if iban else Paragraph("", cell_regular)
+    
     pay_table = Table(
         [
             [Paragraph("<b>Modalità di pagamento</b>", cell_bold)],
             [Paragraph(f"<b>{payment_method}</b>", cell_bold)],
-            [""],
+            [iban_paragraph],
             [""]
         ],
         colWidths=[110 * mm],
-        rowHeights=[4.5 * mm, 6 * mm, 5 * mm, 5 * mm]
+        rowHeights=[4.5 * mm, 6 * mm, 6 * mm, 15 * mm]
     )
     pay_table.setStyle(TableStyle([
         ('BOX', (0, 0), (-1, -1), 0.75, colors.black),
